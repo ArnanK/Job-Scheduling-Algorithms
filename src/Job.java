@@ -30,9 +30,6 @@ public class Job {
      * zero. This is used when checking multiple algorithms for a job.
      */
     public void resetJob(){
-        this.arrivalTime = 0;
-        this.cpuBurst = 0;
-        this.priority = 0;
         this.exitTime = 0;
         this.turnAroundTime = 0;
         this.waitingTime = 0;
