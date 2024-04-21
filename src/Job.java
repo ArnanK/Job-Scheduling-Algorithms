@@ -6,6 +6,7 @@ public class Job {
     protected int exitTime; //algorithm result
     protected int turnAroundTime; //algorithm result
     protected int waitingTime; //algorithm result
+    protected int remainingCpuBurst; //keeps track of cpuBurst
 
     // This code snippet is the constructor of the `Job` class in Java. When a new `Job` object is
     // created, this constructor is called automatically. Inside the constructor, it initializes the
@@ -14,6 +15,14 @@ public class Job {
         this.arrivalTime = (int) ((Math.random() * (250-1)) + 1);
         this.cpuBurst = (int) ((Math.random() * (15-2)) + 2);
         this.priority = (int) ((Math.random() * (5-1)) + 1);
+        this.remainingCpuBurst = this.cpuBurst;
+    }
+
+    public Job(int arrivalTime, int cpuBurst, int priority){
+        this.arrivalTime = arrivalTime;
+        this.cpuBurst = cpuBurst;
+        this.priority = priority;
+        this.remainingCpuBurst = this.cpuBurst;
     }
 
     public String toString(){

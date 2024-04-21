@@ -16,33 +16,21 @@ public class JobAlgorithms{
         SJF(250);
         printJobs();
         resetAllJobs();
+        SRT(250);
+        printJobs();
+        resetAllJobs();
     }
 
-    /**
-     * The `initializeJobs` function creates and adds 25 new Job objects to a jobsList.
-     */
-    private void initializeJobs(){
-        for(int i=0; i<25; i++){
-            Job j = new Job();
-            jobsList.add(j);
-        }
-        Collections.sort(jobsList, new Comparator<Job>(){
-            @Override
-            public int compare(Job j1, Job j2) {
-                return Integer.compare(j1.arrivalTime, j2.arrivalTime);
-            }
-        });
-    }
     
-
+    /*------------------------------------------Job Scheduling Algorithms-------------------------------------------- */
 
     /**
-     * The FIFO function simulates job execution in a First-In-First-Out manner, calculating turnaround
-     * time, waiting time, and exit time for each job. The algorithm runs in O(n) because the queue is bounded by O(n)
-     * and the iteration of the job is in O(n).
+     * The FIFO function simulates job execution in a First-In-First-Out manner, calculating turnaround 
+     * time, waiting time, and exit time for each job. (non-preemtive)
      * 
-     * @param totalTime This parameter determines the duration of the simulation during which 
-     * jobs will be processed based on their arrival times.
+     * The algorithm runs in O(n) because the queue is bounded by O(n) and the iteration of the job is in O(n).
+     * 
+     * @param totalTime duration of the simulation.
      */
     private void FIFO(int totalTime){
         System.out.println("FIFO Algorithm\n");
@@ -65,12 +53,6 @@ public class JobAlgorithms{
                 }
             }
             
-            // This part of the code is responsible for simulating the execution of jobs in a
-            // First-In-First-Out (FIFO) manner. Here's a breakdown of what it does:
-            //      -if there is a job in the queue, decrement the remaining cpuBurst time of the current job.
-            //      -if the job is finished(remainingTime == 0), then remove the job from queue.
-            //          -Perform calculations for turnAroundTime, waitingTime, and Exit Time.
-            //      -If there are futher jobs in the queue, change the remainingCpuBurst to the next Job.
             if(queue.size() != 0){
                 remainingCpuBurst--;
                 if(remainingCpuBurst == 0){
@@ -88,42 +70,24 @@ public class JobAlgorithms{
     }
 
 
-
-
-    /**  The `SJF` method in the `JobAlgorithms` class is implementing the Shortest Job First (SJF)
-        scheduling algorithm. This algorithm runs in O(n) considering if we treat the time as a constant.
+    /**  The `SJF` method in the `JobAlgorithms` class is implementing the Shortest Job First (SJF) 
+        scheduling algorithm. (non-preemtive)
+        
+        This algorithm runs in O(n) considering if we treat the time as a constant.
         This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
         
-        Here's a breakdown of what the method is doing:
-            -Sets up a priority queue.
-            -Keeps track of all active jobs.
-            -Run through each instance in time t and peform necesarry calucaltions.
-                -decerment remaining time.
-                -add any new jobs.
-                -remove any jobs that are not active anymore and replace them with any jobs in the heap.
-     * 
-     @param totalTime This parameter determines the duration of the simulation during which 
-     * jobs will be processed based on their arrival times.
+        @param totalTime duration of the simulation.
      */
     private void SJF(int totalTime){
         System.out.println("SJF Algorithm\n");
         
-        PriorityQueue<Job> pq = new PriorityQueue<Job>(25, new Comparator<Job>() {
-            @Override
-            public int compare(Job j1, Job j2){
-                if(j1.cpuBurst != j2.cpuBurst){
-                    return Integer.compare(j1.cpuBurst, j2.cpuBurst);
-                }else{
-                    return Integer.compare(j1.arrivalTime, j2.arrivalTime);
-                }
-            }
-        });
+        PriorityQueue<Job> pq = new PriorityQueue<Job>(25, shortestJobComparator);
         //Keeps track of any active job and the remainingCPUBurst Time.
-        Job activeJob = new Job();
+        Job activeJob = new Job(-1,-1,-1);
         int remainingCpuBurst=-1;
         
         //Iterate through each time t.
-        for(int t=1; t<=totalTime; t+=1){
+        for(int t=1; t<=totalTime*2; t+=1){
             //Checks to see if the job arrival time matches the current time.
             for(Job job: jobsList){
                 if(job.arrivalTime == t){
@@ -139,7 +103,8 @@ public class JobAlgorithms{
             }
             //decerement job.
             remainingCpuBurst--;
-            //if the job is finished, perform remaining calulations on exit time, turn around time, and waiting time.
+
+            //if the job is finished, set exit time.
             if(remainingCpuBurst == 0){
                 activeJob.exitTime = t+1;
                 activeJob.turnAroundTime = activeJob.exitTime - activeJob.arrivalTime;
@@ -151,7 +116,55 @@ public class JobAlgorithms{
                 }
             }
         }
+    }
+
+    /**  The `SRT` method in is implementing the Shortest Remaining Job scheduling algorithm. (preemptive)
         
+        This algorithm runs in O(n) considering if we treat the time as a constant.
+        This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
+        
+        @param totalTime duration of the simulation.
+     */
+    private void SRT(int totalTime){
+        System.out.println("SRT Algorithm\n");
+        PriorityQueue<Job> pq = new PriorityQueue<Job>(25, shortestJobComparator);
+
+        //increment through time
+        for(int t=1; t<totalTime*2; t++){
+            //add any new jobs
+            for(Job job:jobsList){
+                if(job.arrivalTime == t){
+                    pq.add(job);
+                }
+            }
+            //if there is a job in the pq, decrement the active job.
+            if(!pq.isEmpty()) pq.peek().remainingCpuBurst--;
+
+            //if there is a job and the job is finished, then remove the job from the heap.
+            if(!pq.isEmpty() && pq.peek().remainingCpuBurst == 0){
+                Job exitJob = pq.poll();
+                exitJob.exitTime = t + 1;
+                exitJob.turnAroundTime = exitJob.exitTime - exitJob.arrivalTime;
+                exitJob.waitingTime = exitJob.turnAroundTime - exitJob.cpuBurst;
+            }
+            
+        }
+
+    }
+
+
+    
+    /*------------------------------------------------Job Methods------------------------------------------------------ */
+
+    /**
+     * The `initializeJobs` function creates and adds 25 new Job objects to a jobsList.
+     */
+    private void initializeJobs(){
+        for(int i=0; i<25; i++){
+            Job j = new Job();
+            jobsList.add(j);
+        }
+        Collections.sort(jobsList, initialJobComparator);
     }
 
     /**
@@ -177,5 +190,30 @@ public class JobAlgorithms{
         }
         System.out.println("\n\n");
     }
+
+
+
+    /*------------------------------------------------Job Comparators-------------------------------------------------- */
+    
+    /*  Comparator based on their `arrivalTime` attribute.  */
+    Comparator<Job> initialJobComparator = new Comparator<Job>() {
+        @Override
+        public int compare(Job j1, Job j2) {
+            return Integer.compare(j1.arrivalTime, j2.arrivalTime);
+        }
+    };
+
+
+    /*  Comparator for both SJF and SRT algorithms */
+    Comparator<Job> shortestJobComparator = new Comparator<Job>() {
+        @Override
+        public int compare(Job j1, Job j2){
+            if(j1.remainingCpuBurst != j2.remainingCpuBurst){
+                return Integer.compare(j1.remainingCpuBurst, j2.remainingCpuBurst);
+            }else{
+                return Integer.compare(j1.arrivalTime, j2.arrivalTime);
+            }
+        }
+    };
 
 }
