@@ -21,6 +21,7 @@ public class JobAlgorithms{
      * 
      * The algorithm runs in O(n) because the queue is bounded by O(n) and the iteration of the job is in O(n).
      * 
+     * @param jobList arrayList of the JobObject 
      * @param totalTime duration of the simulation.
      */
     protected void FIFO(ArrayList<JobObject> jobsList, int totalTime){
@@ -64,6 +65,7 @@ public class JobAlgorithms{
         This algorithm runs in O(n) considering if we treat the time as a constant.
         This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
         
+        @param jobList arrayList of the JobObject
         @param totalTime duration of the simulation.
      */
     protected void SJF(ArrayList<JobObject> jobsList, int totalTime){
@@ -122,6 +124,7 @@ public class JobAlgorithms{
         This algorithm runs in O(n) considering if we treat the time as a constant.
         This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
         
+        @param jobList arrayList of the JobObject
         @param totalTime duration of the simulation.
      */
     protected void SRT(ArrayList<JobObject> jobsList, int totalTime){
@@ -165,6 +168,7 @@ public class JobAlgorithms{
         This algorithm runs in O(n) considering if we treat the time as a constant.
         This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
         
+        @param jobList arrayList of the JobObject
         @param totalTime duration of the simulation.
      */
     protected void HighestPriority(ArrayList<JobObject> jobsList, int totalTime){
@@ -211,25 +215,32 @@ public class JobAlgorithms{
         Queue<JobObject> queue = new LinkedList<JobObject>();
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
 
+        int quantumCounter = 0;
         int t=1;
         while(t<=totalTime || !queue.isEmpty()){
             while(!allJobs.isEmpty() && t == allJobs.peek().arrivalTime){
-                queue.add(allJobs.poll());
+                JobObject e = allJobs.poll();
+                queue.add(e);
             }
 
             
-            if(!queue.isEmpty()) queue.peek().remainingCpuBurst -= (contextSwitch + quantumTime);
+            if(!queue.isEmpty()) {
+                queue.peek().remainingCpuBurst--;
+                quantumCounter++;
+            }
 
             if(!queue.isEmpty() && queue.peek().remainingCpuBurst == 0){
                 JobObject exitJob = queue.poll();
                 exitJob.exitTime = t + 1;
                 exitJob.turnAroundTime = exitJob.exitTime - exitJob.arrivalTime;
                 exitJob.waitingTime = exitJob.turnAroundTime - exitJob.cpuBurst;
+                quantumCounter = 0;
             }
-            
 
-            if (!queue.isEmpty()) {
-                
+            if(quantumCounter == quantumTime){
+                JobObject e = queue.poll();
+                queue.add(e);
+                quantumCounter = 0;
             }
 
             t++;
@@ -286,7 +297,7 @@ public class JobAlgorithms{
     }
 
     private void turnAroundTimeAverage(ArrayList<JobObject> jobsList){
-        int avg = 0;
+        double avg = 0;
         for(JobObject job:jobsList){
             avg += job.turnAroundTime;
         }
