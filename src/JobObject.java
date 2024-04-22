@@ -1,4 +1,4 @@
-public class Job {
+public class JobObject {
     //Job Object Attributes
     protected int arrivalTime; //random 1-250
     protected int cpuBurst; //random 2-15
@@ -8,17 +8,17 @@ public class Job {
     protected int waitingTime; //algorithm result
     protected int remainingCpuBurst; //keeps track of cpuBurst
 
-    // This code snippet is the constructor of the `Job` class in Java. When a new `Job` object is
+    // This code snippet is the constructor of the `Job` class in Java. When a new `JobObject` is
     // created, this constructor is called automatically. Inside the constructor, it initializes the
-    // `arrTime`, `cpuBurst`, and `priority` attributes of the `Job` object with random values.
-    public Job(){
+    // `arrTime`, `cpuBurst`, and `priority` attributes of the `JobObject` object with random values.
+    public JobObject(){
         this.arrivalTime = (int) ((Math.random() * (250-1)) + 1);
         this.cpuBurst = (int) ((Math.random() * (15-2)) + 2);
         this.priority = (int) ((Math.random() * (5-1)) + 1);
         this.remainingCpuBurst = this.cpuBurst;
     }
 
-    public Job(int arrivalTime, int cpuBurst, int priority){
+    public JobObject(int arrivalTime, int cpuBurst, int priority){
         this.arrivalTime = arrivalTime;
         this.cpuBurst = cpuBurst;
         this.priority = priority;
@@ -30,7 +30,7 @@ public class Job {
         return str;
     }
 
-    public int compareTo(Job j1){
+    public int compareTo(JobObject j1){
         return Integer.compare(this.arrivalTime, j1.arrivalTime);
     }
 
@@ -42,6 +42,8 @@ public class Job {
         this.exitTime = 0;
         this.turnAroundTime = 0;
         this.waitingTime = 0;
+        this.remainingCpuBurst = this.cpuBurst;
+
     }
 
 
