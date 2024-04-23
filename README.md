@@ -1,8 +1,6 @@
 
 # Job Scheduling Algorithms
 
-CSCI 340
-
 This consists of Job Scheduling Algorithms such as FIFO, SRT, SJF, Highest Priority, and Round Robin. 
 
 - Calculates the Exit Time, Turn Around Time and Waiting Time for each Algorithm.
