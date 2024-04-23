@@ -1,18 +1,40 @@
-## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+# Job Scheduling Algorithms
 
-## Folder Structure
+CSCI 340
 
-The workspace contains two folders by default, where:
+This consists of Job Scheduling Algorithms such as FIFO, SRT, SJF, Highest Priority, and Round Robin. 
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+- Calculates the Exit Time, Turn Around Time and Waiting Time for each Algorithm.
+- Calculates the average Turn Around Time and throughput time at any time t.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+## Run Locally
 
-## Dependency Management
+Clone the project
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+```bash
+  git clone https://github.com/ArnanK/Job-Scheduling-Algorithms.git
+```
+
+Go to the project directory
+
+```bash
+  cd Job-Scheduling-Algorithms
+```
+Compile and run
+```
+  run
+```
+
+
+## Demo
+
+![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHQ0eXNvbHNjdGdtOGQ2OWpoODdkd2RqeGRjMXc1Z2dwYno0N3JjaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L5Q01pLWJ4p3RUf0ng/giphy.gif)
+
+
+
+## Author
+
+- [@ArnanK](https://github.com/ArnanK)
+

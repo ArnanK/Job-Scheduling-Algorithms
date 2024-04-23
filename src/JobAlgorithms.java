@@ -29,9 +29,12 @@ public class JobAlgorithms{
         
         //initialize queue
         Queue<JobObject> queue = new LinkedList<JobObject>();
+        //keep track of earliest arrival time
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
 
         int t=1;
+        
+        
         while(t<=totalTime || !queue.isEmpty()){
             //when the current time = arrival time, add them into the queue.
             while(!allJobs.isEmpty() && t == allJobs.peek().arrivalTime){
@@ -55,6 +58,7 @@ public class JobAlgorithms{
 
         //print the job and reset all the calculated values.
         printJobs(jobsList);
+        
         resetAllJobs(jobsList);
     }
 
@@ -72,21 +76,21 @@ public class JobAlgorithms{
         System.out.println("SJF Algorithm\n");
         
         PriorityQueue<JobObject> pq = new PriorityQueue<JobObject>(25, shortestJobComparator);
+        
+        //keep track of earliest arrival time
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
 
         //Keeps track of any active job and the remainingCPUBurst Time.
         JobObject activeJob = new JobObject(-1,-1,-1);
-        int remainingCpuBurst=-1;
         
         int t = 1; //time
-        //increment through time or until pq is empty.
-        while(t<=totalTime || !pq.isEmpty()){
+        //increment through time or until pq is empty or active job is running.
+        while(t<=totalTime || !pq.isEmpty() || activeJob.remainingCpuBurst > 0){
             //Checks to see if the job arrival time matches the current time.
             while(!allJobs.isEmpty() && t == allJobs.peek().arrivalTime){
                 //If there are no jobs in queue and the active job is not currently running, then add new job.
-                if(pq.size() == 0 && remainingCpuBurst <= 0){
+                if(pq.size() == 0 && activeJob.remainingCpuBurst <= 0){
                     activeJob = allJobs.poll();
-                    remainingCpuBurst = activeJob.remainingCpuBurst;
                 }else{
                     //else add into the heap
                     //add job to heap.
@@ -95,17 +99,16 @@ public class JobAlgorithms{
             }
         
             //decerement job.
-            remainingCpuBurst--;
+            activeJob.remainingCpuBurst--;
 
             //if the job is finished, set exit time.
-            if(remainingCpuBurst == 0){
+            if(activeJob.remainingCpuBurst == 0){
                 activeJob.exitTime = t+1;
                 activeJob.turnAroundTime = activeJob.exitTime - activeJob.arrivalTime;
                 activeJob.waitingTime = activeJob.turnAroundTime - activeJob.cpuBurst;
                 //if there are jobs in the queue, set this as the active job.
                 if(pq.size()>0){
-                    activeJob = pq.remove();
-                    remainingCpuBurst = activeJob.remainingCpuBurst;
+                    activeJob = pq.poll();
                 }
             }
             
@@ -131,6 +134,7 @@ public class JobAlgorithms{
         System.out.println("SRT Algorithm\n");
         PriorityQueue<JobObject> pq = new PriorityQueue<JobObject>(25, shortestJobComparator);
         
+        //keep track of earliest arrival time
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
 
         int t = 1; //time
@@ -175,6 +179,7 @@ public class JobAlgorithms{
         System.out.println("Highest Priority Algorithm\n");
         PriorityQueue<JobObject> pq = new PriorityQueue<JobObject>(25, priorityComparator);
         
+        //keep track of earliest arrival time
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
 
         int t = 1; //time
@@ -208,39 +213,69 @@ public class JobAlgorithms{
 
     }
 
+    /**  The `RoundRobin` method in is implementing the Round Robin scheduling algorithm. (non-preemtive)
+        
+        This algorithm runs in O(n) considering if we treat the time as a constant.
+        This algorithm utilizes a heap which at most runs in O(logN) but the iteration of the total jobs makes this algorithm O(n).
+        
+        @param jobList arrayList of the JobObject
+        @param totalTime duration of the simulation.
+     */
     protected void RoundRobin(ArrayList<JobObject> jobsList, int totalTime, int quantumTime, int contextSwitch){
         System.out.println("Round Robin Algorithm\n");
         
         //initialize queue
         Queue<JobObject> queue = new LinkedList<JobObject>();
+        
+        //keep track of earliest arrival time
         Queue<JobObject> allJobs = new LinkedList<JobObject>(jobsList);
+
+        //keep track for context switch
+        Boolean activeContextSwitch = false;
+        int remainingContextSwitch = contextSwitch;
 
         int quantumCounter = 0;
         int t=1;
+
         while(t<=totalTime || !queue.isEmpty()){
+            //add any new jobs which are available at the current time.
             while(!allJobs.isEmpty() && t == allJobs.peek().arrivalTime){
                 JobObject e = allJobs.poll();
                 queue.add(e);
             }
 
+            //if curr state is context switch state, perform only context switch calculations.
+            if(activeContextSwitch){
+                remainingContextSwitch--;
+                if(remainingContextSwitch <= 0){
+                    activeContextSwitch = false; 
+                    t--;
+                }
             
-            if(!queue.isEmpty()) {
-                queue.peek().remainingCpuBurst--;
-                quantumCounter++;
-            }
+            //else, decrement active job burst.
+            }else{
+            
+                if(!queue.isEmpty()) {
+                    queue.peek().remainingCpuBurst--;
+                    quantumCounter++;
+                }
 
-            if(!queue.isEmpty() && queue.peek().remainingCpuBurst == 0){
-                JobObject exitJob = queue.poll();
-                exitJob.exitTime = t + 1;
-                exitJob.turnAroundTime = exitJob.exitTime - exitJob.arrivalTime;
-                exitJob.waitingTime = exitJob.turnAroundTime - exitJob.cpuBurst;
-                quantumCounter = 0;
-            }
-
-            if(quantumCounter == quantumTime){
-                JobObject e = queue.poll();
-                queue.add(e);
-                quantumCounter = 0;
+                if(!queue.isEmpty() && queue.peek().remainingCpuBurst == 0){
+                    JobObject exitJob = queue.poll();
+                    exitJob.exitTime = t + 1;
+                    exitJob.turnAroundTime = exitJob.exitTime - exitJob.arrivalTime;
+                    exitJob.waitingTime = exitJob.turnAroundTime - exitJob.cpuBurst;
+                    quantumCounter = 0;
+                }
+                
+                //if we exceeded the quantumTime, send the job into the back of the queue.
+                if(quantumCounter == quantumTime){
+                    JobObject e = queue.poll();
+                    queue.add(e);
+                    quantumCounter = 0;
+                    activeContextSwitch = true;
+                    remainingContextSwitch = contextSwitch;
+                }
             }
 
             t++;
@@ -250,7 +285,6 @@ public class JobAlgorithms{
         //print the job and reset all the calculated values.
         printJobs(jobsList);
         resetAllJobs(jobsList);
-
 
     }
 
@@ -292,10 +326,16 @@ public class JobAlgorithms{
             System.out.println(jobsList.get(i).toString());
         }
         turnAroundTimeAverage(jobsList);
+        calcualteThroughput(70, jobsList);
         System.out.println("\n\n");
         
     }
 
+    /**
+     * The function calculates the average turn around time for a list of jobs and prints the result.
+     * 
+     * @param jobsList entire jobList Array with JobObject
+     */
     private void turnAroundTimeAverage(ArrayList<JobObject> jobsList){
         double avg = 0;
         for(JobObject job:jobsList){
@@ -304,6 +344,21 @@ public class JobAlgorithms{
 
         avg /= jobsList.size();
         System.out.println("\nThe Turn Around Time Average is: " + avg);
+    }
+
+    /**
+     * The function calculates the throughput of jobs in a list that have exited before a specified
+     * time.
+     * 
+     * @param fixedTime specify fixed time of throughput
+     * @param jobsList entire jobList Array with JobObject
+     */
+    private void calcualteThroughput(int fixedTime, ArrayList<JobObject> jobsList){
+        int throughput = 0;
+        for(JobObject job:jobsList){
+            if(job.exitTime <= fixedTime)throughput++;
+        }
+        System.out.println("The Throughout at time "+ fixedTime + " is: " + throughput);
     }
 
 
@@ -331,6 +386,7 @@ public class JobAlgorithms{
         }
     };
 
+    /*  Comparator for Highest Priority algorithm */
     Comparator<JobObject> priorityComparator = new Comparator<JobObject>() {
         @Override
         public int compare(JobObject j1, JobObject j2){
