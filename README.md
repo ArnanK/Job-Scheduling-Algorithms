@@ -25,6 +25,11 @@ Compile and run
   run
 ```
 
+## Documentation
+
+[Preview Google Docs Document](https://docs.google.com/document/d/1PyDm8EHZ-kQJOQDTuoPwySUFJ6T05_xoXWNoADr3B4Q/edit?usp=sharing
+)
+
 
 ## Demo
 
