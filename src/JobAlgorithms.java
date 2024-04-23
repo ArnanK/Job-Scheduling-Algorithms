@@ -243,7 +243,6 @@ public class JobAlgorithms{
                 JobObject e = allJobs.poll();
                 queue.add(e);
             }
-
             //if curr state is context switch state, perform only context switch calculations.
             if(activeContextSwitch){
                 remainingContextSwitch--;
@@ -251,7 +250,6 @@ public class JobAlgorithms{
                     activeContextSwitch = false; 
                     t--;
                 }
-            
             //else, decrement active job burst.
             }else{
             
@@ -259,7 +257,6 @@ public class JobAlgorithms{
                     queue.peek().remainingCpuBurst--;
                     quantumCounter++;
                 }
-
                 if(!queue.isEmpty() && queue.peek().remainingCpuBurst == 0){
                     JobObject exitJob = queue.poll();
                     exitJob.exitTime = t + 1;
@@ -267,7 +264,6 @@ public class JobAlgorithms{
                     exitJob.waitingTime = exitJob.turnAroundTime - exitJob.cpuBurst;
                     quantumCounter = 0;
                 }
-                
                 //if we exceeded the quantumTime, send the job into the back of the queue.
                 if(quantumCounter == quantumTime){
                     JobObject e = queue.poll();
@@ -277,9 +273,7 @@ public class JobAlgorithms{
                     remainingContextSwitch = contextSwitch;
                 }
             }
-
             t++;
-
         }
 
         //print the job and reset all the calculated values.
@@ -358,7 +352,7 @@ public class JobAlgorithms{
         for(JobObject job:jobsList){
             if(job.exitTime <= fixedTime)throughput++;
         }
-        System.out.println("The Throughout at time "+ fixedTime + " is: " + throughput);
+        System.out.println("The Throughput at time "+ fixedTime + " is: " + throughput);
     }
 
 
